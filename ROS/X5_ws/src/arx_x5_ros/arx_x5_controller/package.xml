@@ -17,9 +17,9 @@
     <build_export_depend>std_msgs</build_export_depend>
     <exec_depend>std_msgs</exec_depend>
 
-    <build_depend>arx_x5_msg</build_depend>
-    <build_export_depend>arx_x5_msg</build_export_depend>
-    <exec_depend>arx_x5_msg</exec_depend>
+    <build_depend>arx5_arm_msg</build_depend>
+    <build_export_depend>arx5_arm_msg</build_export_depend>
+    <exec_depend>arx5_arm_msg</exec_depend>
 
     <build_depend>arm_control</build_depend>
     <build_export_depend>arm_control</build_export_depend>

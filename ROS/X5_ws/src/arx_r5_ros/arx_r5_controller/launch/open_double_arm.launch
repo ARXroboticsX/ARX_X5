@@ -1,0 +1,17 @@
+<launch>
+    <node pkg="arx_r5_controller" type="R5Controller" name="arm_l">
+        <param name="arm_control_type" value="normal"/>
+        <param name="arm_can_id" value="can1"/>
+        <param name="arm_pub_topic_name" value="/arm_l_status"/>
+        <param name="arm_sub_topic_name" value="/joint_control_l"/>
+        <param name="arm_end_type" value="0"/>
+    </node>
+
+    <node pkg="arx_r5_controller" type="R5Controller" name="arm_r">
+        <param name="arm_control_type" value="normal"/>
+        <param name="arm_can_id" value="can3"/>
+        <param name="arm_pub_topic_name" value="/arm_r_status"/>
+        <param name="arm_sub_topic_name" value="/joint_control_r"/>
+        <param name="arm_end_type" value="0"/>
+    </node>
+</launch>

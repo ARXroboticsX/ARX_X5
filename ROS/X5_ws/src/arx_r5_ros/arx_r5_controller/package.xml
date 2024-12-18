@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>arx_r5_controller</name>
+    <version>0.0.0</version>
+    <description>TODO: Package description</description>
+    <maintainer email="evencewu@outlook.com">evencewu</maintainer>
+    <license>TODO: License declaration</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>geometry_msgs</depend>
+    <depend>roscpp</depend>
+    <depend>sensor_msgs</depend>
+    
+    <build_depend>std_msgs</build_depend>
+    <build_export_depend>std_msgs</build_export_depend>
+    <exec_depend>std_msgs</exec_depend>
+
+    <build_depend>arx5_arm_msg</build_depend>
+    <build_export_depend>arx5_arm_msg</build_export_depend>
+    <exec_depend>arx5_arm_msg</exec_depend>
+
+    <build_depend>arm_control</build_depend>
+    <build_export_depend>arm_control</build_export_depend>
+    <exec_depend>arm_control</exec_depend>
+
+    <build_depend>message_generation</build_depend>
+    <exec_depend>message_runtime</exec_depend>
+
+</package>

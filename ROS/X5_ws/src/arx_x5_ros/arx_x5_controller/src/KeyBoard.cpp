@@ -7,7 +7,7 @@ namespace arx::x5
     KeyBoardNode::KeyBoardNode(ros::NodeHandle nh)
     {
         // 创建发布器
-        joint_cmd_publisher_ = nh.advertise<arx_x5_msg::RobotCmd>("/x5_cmd", 10);
+        joint_cmd_publisher_ = nh.advertise<arx5_arm_msg::RobotCmd>("/x5_cmd", 10);
         // // 创建订阅器
 
         timer_ = nh.createTimer(ros::Duration(0.01), &KeyBoardNode::Update, this);
