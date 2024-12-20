@@ -18,15 +18,17 @@ namespace arx
         class MotorType3 : public MotorDlcBase
         {
         public:
-            MotorType3(int motor_id) : motor_id_(motor_id) {};
+            MotorType3(int motor_id) : motor_id_(motor_id)
+            {
+            };
 
-            CanFrame packMotorMsg(HybridJointCmd *command);
+            CanFrame packMotorMsg(HybridJointCmd* command);
             CanFrame packMotorMsg(double k_p, double k_d, double position, double velocity, double torque);
 
             CanFrame packEnableMotor();
             CanFrame packDisableMotor();
 
-            void CanAnalyze(CanFrame *frame) override; // 尝试接收电机数据
+            void CanAnalyze(CanFrame* frame) override; // 尝试接收电机数据
 
             HybridJointStatus GetMotorMsg();
             void ExchangeMotorMsg();
@@ -39,10 +41,12 @@ namespace arx
             double current_;
 
             double position_exchange_;
+            double last_q_raw_;
+            int circle = 0;
             double velocity_exchange_;
             double current_exchange_;
 
-            CanFrame *frame_;
+            CanFrame* frame_;
             int motor_id_;
         };
     }

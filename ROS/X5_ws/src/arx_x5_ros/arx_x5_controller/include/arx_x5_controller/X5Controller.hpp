@@ -19,30 +19,42 @@ namespace arx::x5
     public:
         X5Controller(ros::NodeHandle nh);
 
-        void CmdCallback(const arx5_arm_msg::RobotCmd::ConstPtr &msg);
+        ~X5Controller();
+        // sub
+        void CmdCallbackV1(const arm_control::PosCmd::ConstPtr &msg);
+        void CmdCallbackV2(const arx5_arm_msg::RobotCmd::ConstPtr &msg);
+
+        void FollowCallbackV1(const arm_control::JointInfomation::ConstPtr &msg);
+        void FollowCallbackV2(const arx5_arm_msg::RobotStatus::ConstPtr &msg);
+
+        void JointControlCallbackV1(const arm_control::JointControl::ConstPtr &msg);
+
+        // pub
         void PubState(const ros::TimerEvent &);
+        // 发布old_joint_state_publisher_和old_ee_pos_publisher_信息
+        void pubArmStatusV1(std::vector<double> joint_pos_vector,
+                            std::vector<double> joint_velocities_vector,
+                            std::vector<double> joint_current_vector,
+                            std::vector<double> xyzrpy);
 
-        void OldCmdCallback(const arm_control::JointControl::ConstPtr &msg);
-        void VrCmdCallback(const arm_control::PosCmd::ConstPtr &msg);
-        void FollowCmdCallback(const arx5_arm_msg::RobotStatus::ConstPtr &msg);
-
-        void PubOldJointState(std::vector<double> joint_pos_vector,
-                              std::vector<double> joint_velocities_vector,
-                              std::vector<double> joint_current_vector);
-
-        void PubOldEndState(std::vector<double> xyzrpy, double gripper);
+        void pubArmStatusV2(std::vector<double> joint_pos_vector,
+                            std::vector<double> joint_velocities_vector,
+                            std::vector<double> joint_current_vector,
+                            std::vector<double> xyzrpy);
 
     private:
-        bool pub_old_joint_topic_ = false;
-        bool pub_old_end_topic_ = false;
+
+        bool pub_topic_v1_ = false;
+        bool pub_topic_v2_ = false;
         std::shared_ptr<InterfacesThread> interfaces_ptr_;
 
         ros::Publisher joint_state_publisher_;
         ros::Subscriber joint_state_subscriber_;
 
-        ros::Publisher old_joint_state_publisher_;
-        ros::Publisher old_ee_pos_publisher_;
+        ros::Publisher joint_state_publisher_v1_;
+        ros::Publisher ee_pos_publisher_v1_;
 
         ros::Timer timer_;
     };
 }
+

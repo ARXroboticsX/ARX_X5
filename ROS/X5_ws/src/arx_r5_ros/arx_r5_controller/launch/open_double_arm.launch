@@ -1,17 +1,23 @@
 <launch>
     <node pkg="arx_r5_controller" type="R5Controller" name="arm_l">
-        <param name="arm_control_type" value="normal"/>
+        <param name="arm_control_type" value="joint_control_v1"/>
         <param name="arm_can_id" value="can1"/>
-        <param name="arm_pub_topic_name" value="/arm_l_status"/>
-        <param name="arm_sub_topic_name" value="/joint_control_l"/>
         <param name="arm_end_type" value="0"/>
+
+        <param name="sub_topic_name" value="/joint_control"/>
+
+        <param name="pub_topic_ee_name_v1" value="/follow1_pos_back"/>
+        <param name="pub_topic_joint_name_v1" value="/joint_information"/>
     </node>
 
     <node pkg="arx_r5_controller" type="R5Controller" name="arm_r">
-        <param name="arm_control_type" value="normal"/>
+        <param name="arm_control_type" value="joint_control_v1"/>
         <param name="arm_can_id" value="can3"/>
-        <param name="arm_pub_topic_name" value="/arm_r_status"/>
-        <param name="arm_sub_topic_name" value="/joint_control_r"/>
         <param name="arm_end_type" value="0"/>
+
+        <param name="sub_topic_name" value="/joint_control2"/>
+
+        <param name="pub_topic_ee_name_v1" value="/follow2_pos_back"/>
+        <param name="pub_topic_joint_name_v1" value="/joint_information2"/>
     </node>
 </launch>

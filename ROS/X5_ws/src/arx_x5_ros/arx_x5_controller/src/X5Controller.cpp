@@ -1,5 +1,8 @@
 #include "arx_x5_controller/X5Controller.hpp"
 
+#include "ros/ros.h"
+#include <thread>
+#include <chrono>
 // using namespace std::chrono_literals;
 
 namespace arx::x5
@@ -7,110 +10,98 @@ namespace arx::x5
     X5Controller::X5Controller(ros::NodeHandle nh)
     {
         ROS_INFO("机械臂开始初始化...");
-        std::string arm_control_type = nh.param("arm_control_type", std::string("normal"));
-        std::string pub_topic_name = nh.param("arm_pub_topic_name", std::string("arm_status"));
-        std::string sub_topic_name = nh.param("arm_sub_topic_name", std::string("arm_cmd"));
-        std::string pub_topic_name_joint_old = nh.param("arm_pub_topic_name_joint_old", std::string("arm_status_old"));
-        std::string pub_topic_name_ee_old = nh.param("arm_pub_topic_name_ee_old", std::string("arm_status_old"));
+        std::string arm_control_type = nh.param("arm_control_type", std::string("normal_v2"));
+
+        std::string sub_topic_name = nh.param("sub_topic_name", std::string("/arm_cmd"));
+        std::string pub_topic_ee_name_v1 = nh.param("pub_topic_ee_name_v1", std::string("/arm_status_ee"));
+        std::string pub_topic_joint_name_v1 = nh.param("pub_topic_joint_name_v1", std::string("/arm_status_joint"));
+        std::string pub_topic_name_v2 = nh.param("pub_topic_name_v2", std::string("/arm_status"));
 
         interfaces_ptr_ = std::make_shared<InterfacesThread>(nh.param("arm_can_id", std::string("can0")), nh.param("arm_end_type", 0));
 
-        if (arm_control_type == "normal")
+        if (arm_control_type == "normal_v1")
         {
+            ROS_INFO("常规模式启动[v1]");
+            // sub
+            joint_state_subscriber_ = nh.subscribe<arm_control::PosCmd>(
+                sub_topic_name, 10, &X5Controller::CmdCallbackV1, this);
 
-            ROS_INFO("常规模式启动");
-            // 创建发布器
-            joint_state_publisher_ = nh.advertise<arx5_arm_msg::RobotStatus>(pub_topic_name, 10);
-            // // 创建订阅器
+            // pub
+            ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            pub_topic_v1_ = true;
+            pub_topic_v2_ = false;
+        }
+        else if (arm_control_type == "normal_v2")
+        {
+            ROS_INFO("常规模式启动[v2]");
+            // sub
             joint_state_subscriber_ = nh.subscribe<arx5_arm_msg::RobotCmd>(
-                sub_topic_name, 10, &X5Controller::CmdCallback, this);
-            // 定时器，用于发布关节信息
-
-            timer_ = nh.createTimer(ros::Duration(0.01), &X5Controller::PubState, this);
+                sub_topic_name, 10, &X5Controller::CmdCallbackV2, this);
+            // pub
+            joint_state_publisher_ = nh.advertise<arx5_arm_msg::RobotStatus>(pub_topic_name_v2, 10);
+            pub_topic_v1_ = false;
+            pub_topic_v2_ = true;
         }
-        else if (arm_control_type == "normal_old")
+        else if (arm_control_type == "vr_slave_v1")
         {
-            ROS_INFO("常规模式启动[old_topic模式]");
-            old_ee_pos_publisher_ = nh.advertise<arm_control::PosCmd>(pub_topic_name_ee_old, 10);
-            pub_old_end_topic_ = true;
-            
-            old_joint_state_publisher_ = nh.advertise<arm_control::JointInfomation>(pub_topic_name_joint_old, 10);
-            pub_old_joint_topic_ = true;
+            ROS_INFO("vr_slave启动[v1]");
+            // sub
+            joint_state_subscriber_ = nh.subscribe<arm_control::JointInfomation>(
+                sub_topic_name, 10, &X5Controller::FollowCallbackV1, this);
 
-            // 创建发布器
-            joint_state_publisher_ = nh.advertise<arx5_arm_msg::RobotStatus>(pub_topic_name, 10);
-            // // 创建订阅器
+            // pub
+            ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            pub_topic_v1_ = true;
+            pub_topic_v2_ = false;
+        }
+        else if (arm_control_type == "remote_master_v1")
+        {
+            ROS_INFO("remote_master启动[v1]");
+            interfaces_ptr_->setArmStatus(InterfacesThread::state::G_COMPENSATION);
+            // pub
+            ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            pub_topic_v1_ = true;
+            pub_topic_v2_ = false;
+        }
+        else if (arm_control_type == "remote_slave_v1")
+        {
+            ROS_INFO("remote_slave启动[v1]");
+            // sub
+            joint_state_subscriber_ = nh.subscribe<arm_control::JointInfomation>(
+                sub_topic_name, 10, &X5Controller::FollowCallbackV1, this);
+
+            // pub
+            ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            pub_topic_v1_ = true;
+            pub_topic_v2_ = false;
+        }
+        else if (arm_control_type == "joint_control_v1")
+        {
+            ROS_INFO("常规模式启动[v1]");
+            // sub
             joint_state_subscriber_ = nh.subscribe<arm_control::JointControl>(
-                sub_topic_name, 10, &X5Controller::OldCmdCallback, this);
-            // 定时器，用于发布关节信息
+                sub_topic_name, 10, &X5Controller::JointControlCallbackV1, this);
 
-            timer_ = nh.createTimer(ros::Duration(0.01), &X5Controller::PubState, this);
-        }
-        else if (arm_control_type == "vr_slave")
-        {
-            ROS_INFO("vr遥操作模式启动");
-            joint_state_publisher_ = nh.advertise<arm_control::PosCmd>(pub_topic_name, 10);
-            joint_state_subscriber_ = nh.subscribe<arm_control::PosCmd>(
-                sub_topic_name, 10, &X5Controller::VrCmdCallback, this);
-            timer_ = nh.createTimer(ros::Duration(0.01), &X5Controller::PubState, this);
-        }
-        else if (arm_control_type == "vr_slave_old")
-        {
-            ROS_INFO("vr遥操作模式启动[old_topic兼容模式]");
-            old_joint_state_publisher_ = nh.advertise<arm_control::JointInfomation>(pub_topic_name_joint_old, 10);
-            pub_old_joint_topic_ = true;
-
-            old_ee_pos_publisher_ = nh.advertise<arm_control::PosCmd>(pub_topic_name_ee_old, 10);
-            pub_old_end_topic_ = true;
-
-            joint_state_publisher_ = nh.advertise<arm_control::PosCmd>(pub_topic_name, 10);
-            joint_state_subscriber_ = nh.subscribe<arm_control::PosCmd>(
-                sub_topic_name, 10, &X5Controller::VrCmdCallback, this);
-            timer_ = nh.createTimer(ros::Duration(0.01), &X5Controller::PubState, this);
-        }
-        else if (arm_control_type == "aloha_master")
-        {
-            ROS_INFO("aloha主机模式启动");
-            joint_state_publisher_ = nh.advertise<arx5_arm_msg::RobotStatus>(pub_topic_name, 10);
-            interfaces_ptr_->setArmStatus(InterfacesThread::state::G_COMPENSATION);
-            timer_ = nh.createTimer(ros::Duration(0.01), &X5Controller::PubState, this);
-        }
-        else if (arm_control_type == "aloha_slave")
-        {
-            ROS_INFO("aloha从机模式启动");
-            joint_state_publisher_ = nh.advertise<arx5_arm_msg::RobotStatus>(pub_topic_name, 10);
-            joint_state_subscriber_ = nh.subscribe<arx5_arm_msg::RobotStatus>(
-                sub_topic_name, 10, &X5Controller::FollowCmdCallback, this);
-            timer_ = nh.createTimer(ros::Duration(0.01), &X5Controller::PubState, this);
+            // pub
+            ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            pub_topic_v1_ = true;
+            pub_topic_v2_ = false;
         }
 
-        else if (arm_control_type == "aloha_master_old")
-        {
-            ROS_INFO("aloha主机模式启动[old_topic兼容模式]");
-            old_ee_pos_publisher_ = nh.advertise<arm_control::PosCmd>(pub_topic_name_ee_old, 10);
-            pub_old_end_topic_ = true;
-
-            joint_state_publisher_ = nh.advertise<arx5_arm_msg::RobotStatus>(pub_topic_name, 10);
-            interfaces_ptr_->setArmStatus(InterfacesThread::state::G_COMPENSATION);
-            timer_ = nh.createTimer(ros::Duration(0.01), &X5Controller::PubState, this);
-        }
-        else if (arm_control_type == "aloha_slave_old")
-        {
-            ROS_INFO("aloha从机模式启动[old_topic兼容模式]");
-            old_ee_pos_publisher_ = nh.advertise<arm_control::PosCmd>(pub_topic_name_ee_old, 10);
-            pub_old_end_topic_ = true;
-
-            old_joint_state_publisher_ = nh.advertise<arm_control::JointInfomation>(pub_topic_name_joint_old, 10);
-            pub_old_joint_topic_ = true;
-
-            joint_state_publisher_ = nh.advertise<arx5_arm_msg::RobotStatus>(pub_topic_name, 10);
-            joint_state_subscriber_ = nh.subscribe<arx5_arm_msg::RobotStatus>(
-                sub_topic_name, 10, &X5Controller::FollowCmdCallback, this);
-            timer_ = nh.createTimer(ros::Duration(0.01), &X5Controller::PubState, this);
-        }
+        timer_ = nh.createTimer(ros::Duration(0.01), &X5Controller::PubState, this);
     }
 
-    void X5Controller::CmdCallback(const arx5_arm_msg::RobotCmd::ConstPtr &msg)
+    X5Controller::~X5Controller()
+    {
+        interfaces_ptr_->setArmStatus(InterfacesThread::state::PROTECT);
+    }
+
+    void X5Controller::CmdCallbackV2(const arx5_arm_msg::RobotCmd::ConstPtr &msg)
     {
         double end_pos[6] = {msg->end_pos[0], msg->end_pos[1], msg->end_pos[2], msg->end_pos[3], msg->end_pos[4], msg->end_pos[5]};
 
@@ -132,94 +123,16 @@ namespace arx::x5
         interfaces_ptr_->setCatch(msg->gripper);
     }
 
-    void X5Controller::PubState(const ros::TimerEvent &)
-    {
-        arx5_arm_msg::RobotStatus msg;
-        msg.header.stamp = ros::Time::now();
-
-        Eigen::Isometry3d transform = interfaces_ptr_->getEndPose();
-
-        /*
-        // 提取四元数和位移
-        Eigen::Quaterniond quat(transform.rotation());
-        Eigen::Vector3d translation = transform.translation();
-
-        // 创建长度为7的vector
-
-        */
-
-        // 填充vector
-        boost::array<double, 6> result;
-
-        std::vector<double> xyzrpy = {0, 0, 0, 0, 0, 0};
-        xyzrpy = solve::Isometry2Xyzrpy(transform);
-
-        result[0] = xyzrpy[0];
-        result[1] = xyzrpy[1];
-        result[2] = xyzrpy[2];
-        result[3] = xyzrpy[3];
-        result[4] = xyzrpy[4];
-        result[5] = xyzrpy[5];
-
-        msg.end_pos = result;
-
-        std::vector<double> joint_pos_vector = interfaces_ptr_->getJointPositons();
-        for (int i = 0; i < 7; i++)
-        {
-            msg.joint_pos[i] = joint_pos_vector[i];
-        }
-
-        std::vector<double> joint_velocities_vector = interfaces_ptr_->getJointVelocities();
-        for (int i = 0; i < 7; i++)
-        {
-            msg.joint_vel[i] = joint_velocities_vector[i];
-        }
-
-        std::vector<double> joint_current_vector = interfaces_ptr_->getJointCurrent();
-        for (int i = 0; i < 7; i++)
-        {
-            msg.joint_cur[i] = joint_current_vector[i];
-        }
-
-        // 发布消息
-        ROS_INFO("Publishing RobotStatus message");
-        joint_state_publisher_.publish(msg);
-
-        if (pub_old_joint_topic_)
-        {
-            PubOldJointState(joint_pos_vector, joint_velocities_vector, joint_current_vector);
-        }
-
-        if (pub_old_end_topic_)
-        {
-            PubOldEndState(xyzrpy,joint_pos_vector[6]);
-        }
-    }
-
-    void X5Controller::OldCmdCallback(const arm_control::JointControl::ConstPtr &msg)
-    {
-        std::vector<double> joint_positions = {0, 0, 0, 0, 0, 0};
-
-        for (int i = 0; i < 6; i++)
-        {
-            joint_positions[i] = msg->joint_pos[i];
-        }
-
-        interfaces_ptr_->setJointPositions(joint_positions);
-        interfaces_ptr_->setArmStatus(InterfacesThread::state::POSITION_CONTROL);
-        interfaces_ptr_->setCatch(msg->joint_pos[6]);
-    }
-
-    void X5Controller::VrCmdCallback(const arm_control::PosCmd::ConstPtr &msg)
+    void X5Controller::CmdCallbackV1(const arm_control::PosCmd::ConstPtr &msg)
     {
         double input[6] = {msg->x, msg->y, msg->z, msg->roll, msg->pitch, msg->yaw};
         Eigen::Isometry3d transform = solve::Xyzrpy2Isometry(input);
         interfaces_ptr_->setEndPose(transform);
-        interfaces_ptr_->setArmStatus(4);
+        interfaces_ptr_->setArmStatus(InterfacesThread::state::END_CONTROL);
         interfaces_ptr_->setCatch(msg->gripper);
     }
 
-    void X5Controller::FollowCmdCallback(const arx5_arm_msg::RobotStatus::ConstPtr &msg)
+    void X5Controller::FollowCallbackV2(const arx5_arm_msg::RobotStatus::ConstPtr &msg)
     {
         std::vector<double> target_joint_position(6, 0.0);
 
@@ -234,9 +147,70 @@ namespace arx::x5
         interfaces_ptr_->setCatch(msg->joint_pos[6] * 5);
     }
 
-    void X5Controller::PubOldJointState(std::vector<double> joint_pos_vector,
-                                        std::vector<double> joint_velocities_vector,
-                                        std::vector<double> joint_current_vector)
+    void X5Controller::FollowCallbackV1(const arm_control::JointInfomation::ConstPtr &msg)
+    {
+        std::vector<double> target_joint_position(6, 0.0);
+
+        for (int i = 0; i < 6; i++)
+        {
+            target_joint_position[i] = msg->joint_pos[i];
+        }
+
+        interfaces_ptr_->setJointPositions(target_joint_position);
+        interfaces_ptr_->setArmStatus(InterfacesThread::state::POSITION_CONTROL);
+
+        interfaces_ptr_->setCatch(msg->joint_pos[6] * 5);
+    }
+
+    void X5Controller::JointControlCallbackV1(const arm_control::JointControl::ConstPtr &msg)
+    {
+        std::vector<double> target_joint_position(6, 0.0);
+
+        for (int i = 0; i < 6; i++)
+        {
+            target_joint_position[i] = msg->joint_pos[i];
+        }
+
+        interfaces_ptr_->setJointPositions(target_joint_position);
+        interfaces_ptr_->setArmStatus(InterfacesThread::state::POSITION_CONTROL);
+
+        interfaces_ptr_->setCatch(msg->joint_pos[6] * 5);
+    }
+    
+    // Publisher
+    void X5Controller::PubState(const ros::TimerEvent &)
+    {
+
+        Eigen::Isometry3d transform = interfaces_ptr_->getEndPose();
+
+        // 填充vector
+
+        std::vector<double> xyzrpy = solve::Isometry2Xyzrpy(transform);
+
+        std::vector<double> joint_pos_vector = interfaces_ptr_->getJointPositons();
+
+        std::vector<double> joint_velocities_vector = interfaces_ptr_->getJointVelocities();
+
+        std::vector<double> joint_current_vector = interfaces_ptr_->getJointCurrent();
+
+        // 发布消息
+        ROS_INFO("Publishing RobotStatus message");
+
+        if (pub_topic_v1_)
+        {
+            pubArmStatusV1(joint_pos_vector, joint_velocities_vector, joint_current_vector, xyzrpy);
+        }
+
+        if (pub_topic_v2_)
+        {
+            pubArmStatusV2(joint_pos_vector, joint_velocities_vector, joint_current_vector, xyzrpy);
+        }
+    }
+
+    void X5Controller::pubArmStatusV1(std::vector<double> joint_pos_vector,
+                                      std::vector<double> joint_velocities_vector,
+                                      std::vector<double> joint_current_vector,
+                                      std::vector<double> xyzrpy)
     {
         arm_control::JointInfomation msg;
 
@@ -253,28 +227,59 @@ namespace arx::x5
             msg.joint_cur[i] = joint_current_vector[i];
         }
 
-        old_joint_state_publisher_.publish(msg);
-    }
+        msg.joint_pos[6] = msg.joint_pos[6] * 5;
 
-    void X5Controller::PubOldEndState(std::vector<double> xyzrpy,double gripper)
-    {
+        joint_state_publisher_v1_.publish(msg);
+
         arm_control::PosCmd msg_pos_cmd;
+
         msg_pos_cmd.x = xyzrpy[0];
         msg_pos_cmd.y = xyzrpy[1];
         msg_pos_cmd.z = xyzrpy[2];
         msg_pos_cmd.roll = xyzrpy[3];
         msg_pos_cmd.pitch = xyzrpy[4];
         msg_pos_cmd.yaw = xyzrpy[5];
-        
-        msg_pos_cmd.gripper = gripper;
 
-        old_ee_pos_publisher_.publish(msg_pos_cmd);
+        msg_pos_cmd.gripper = joint_pos_vector[6]*5;
+
+        ee_pos_publisher_v1_.publish(msg_pos_cmd);
+    }
+
+    void X5Controller::pubArmStatusV2(std::vector<double> joint_pos_vector,
+                                      std::vector<double> joint_velocities_vector,
+                                      std::vector<double> joint_current_vector,
+                                      std::vector<double> xyzrpy)
+    {
+        arx5_arm_msg::RobotStatus msg;
+        msg.header.stamp = ros::Time::now();
+
+        boost::array<double, 6> result;
+        for (int i = 0; i < 6; i++)
+        {
+            result[i] = xyzrpy[i];
+        }
+
+        msg.end_pos = result;
+
+        for (int i = 0; i < 7; i++)
+        {
+            msg.joint_pos[i] = joint_pos_vector[i];
+        }
+        for (int i = 0; i < 7; i++)
+        {
+            msg.joint_vel[i] = joint_velocities_vector[i];
+        }
+        for (int i = 0; i < 7; i++)
+        {
+            msg.joint_cur[i] = joint_current_vector[i];
+        }
+        joint_state_publisher_.publish(msg);
     }
 }
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "r5_controller");
+    ros::init(argc, argv, "x5_controller");
     ros::NodeHandle nh = ros::NodeHandle("~");
     arx::x5::X5Controller controller(nh);
     ros::spin();
