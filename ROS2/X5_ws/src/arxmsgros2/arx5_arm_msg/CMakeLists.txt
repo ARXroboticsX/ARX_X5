@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(arx_x5_msg)
+project(arx5_arm_msg)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)

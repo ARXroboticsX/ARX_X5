@@ -1,6 +1,6 @@
 #pragma once
 
-#include "arx_x5_msg/msg/robot_cmd.hpp"
+#include "arx5_arm_msg/msg/robot_cmd.hpp"
 
 #include <rclcpp/rclcpp.hpp>
 #include <chrono>
@@ -17,10 +17,10 @@ namespace arx::x5
         void Update();
 
     private:
-        rclcpp::Publisher<arx_x5_msg::msg::RobotCmd>::SharedPtr joint_cmd_publisher_;
+        rclcpp::Publisher<arx5_arm_msg::msg::RobotCmd>::SharedPtr joint_cmd_publisher_;
         rclcpp::TimerBase::SharedPtr timer_;
 
-        arx_x5_msg::msg::RobotCmd message_;
+        arx5_arm_msg::msg::RobotCmd message_;
 
         int key_[3] = {0};
     };
