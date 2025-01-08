@@ -10,6 +10,8 @@
 
 #include <cmath>
 
+#include <chrono>
+
 namespace arx
 {
     namespace hw_interface
@@ -17,7 +19,9 @@ namespace arx
         class MotorType1 : public MotorDlcBase
         {
         public:
-            MotorType1(int motor_id) : motor_id_(motor_id) {};
+            MotorType1(int motor_id) : motor_id_(motor_id) {
+              last_update_time_exchange_ = std::chrono::system_clock::now();
+            };
 
             CanFrame packMotorMsg(HybridJointCmd *command);
             CanFrame packMotorMsg(double k_p, double k_d, double position, double velocity, double torque);
@@ -28,6 +32,14 @@ namespace arx
             void CanAnalyze(CanFrame *frame) override; // 尝试接收电机数据
 
             HybridJointStatus GetMotorMsg();
+            bool online() override
+            {
+              std::chrono::time_point now = std::chrono::system_clock::now();
+              auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now - last_update_time_);
+              if (duration.count() > 100000)
+                online_ = false;
+              return online_;
+            }
             void ExchangeMotorMsg();
         private:
             double restrictBound(double num, double max, double min);
@@ -35,10 +47,13 @@ namespace arx
             double position_;
             double velocity_;
             double current_;
+            bool online_{true};
+            std::chrono::system_clock::time_point last_update_time_;
 
             double position_exchange_;
             double velocity_exchange_;
             double current_exchange_;
+            std::chrono::system_clock::time_point last_update_time_exchange_;
 
             CanFrame *frame_;
             int motor_id_;

@@ -17,7 +17,9 @@ namespace arx::x5
         std::string pub_topic_joint_name_v1 = nh.param("pub_topic_joint_name_v1", std::string("/arm_status_joint"));
         std::string pub_topic_name_v2 = nh.param("pub_topic_name_v2", std::string("/arm_status"));
 
-        interfaces_ptr_ = std::make_shared<InterfacesThread>(nh.param("arm_can_id", std::string("can0")), nh.param("arm_end_type", 0));
+        arm_end_type_ = nh.param("arm_end_type", 0);
+
+        interfaces_ptr_ = std::make_shared<InterfacesThread>(nh.param("arm_can_id", std::string("can0")), arm_end_type_);
 
         if (arm_control_type == "normal_v1")
         {
@@ -144,7 +146,7 @@ namespace arx::x5
         interfaces_ptr_->setJointPositions(target_joint_position);
         interfaces_ptr_->setArmStatus(InterfacesThread::state::POSITION_CONTROL);
 
-        interfaces_ptr_->setCatch(msg->joint_pos[6] * 5);
+        interfaces_ptr_->setCatch(msg->joint_pos[6]);
     }
 
     void X5Controller::FollowCallbackV1(const arm_control::JointInfomation::ConstPtr &msg)
@@ -159,7 +161,7 @@ namespace arx::x5
         interfaces_ptr_->setJointPositions(target_joint_position);
         interfaces_ptr_->setArmStatus(InterfacesThread::state::POSITION_CONTROL);
 
-        interfaces_ptr_->setCatch(msg->joint_pos[6] * 5);
+        interfaces_ptr_->setCatch(msg->joint_pos[6]);
     }
 
     void X5Controller::JointControlCallbackV1(const arm_control::JointControl::ConstPtr &msg)
@@ -174,7 +176,7 @@ namespace arx::x5
         interfaces_ptr_->setJointPositions(target_joint_position);
         interfaces_ptr_->setArmStatus(InterfacesThread::state::POSITION_CONTROL);
 
-        interfaces_ptr_->setCatch(msg->joint_pos[6] * 5);
+        interfaces_ptr_->setCatch(msg->joint_pos[6]);
     }
     
     // Publisher
@@ -226,8 +228,11 @@ namespace arx::x5
         {
             msg.joint_cur[i] = joint_current_vector[i];
         }
-
-        msg.joint_pos[6] = msg.joint_pos[6] * 5;
+        
+        if(arm_end_type_ == 1)
+        {
+            msg.joint_pos[6] *= 5;
+        }
 
         joint_state_publisher_v1_.publish(msg);
 
@@ -240,7 +245,7 @@ namespace arx::x5
         msg_pos_cmd.pitch = xyzrpy[4];
         msg_pos_cmd.yaw = xyzrpy[5];
 
-        msg_pos_cmd.gripper = joint_pos_vector[6]*5;
+        msg_pos_cmd.gripper = joint_pos_vector[6];
 
         ee_pos_publisher_v1_.publish(msg_pos_cmd);
     }
@@ -273,6 +278,12 @@ namespace arx::x5
         {
             msg.joint_cur[i] = joint_current_vector[i];
         }
+
+        if(arm_end_type_ == 1)
+        {
+            msg.joint_pos[6] *= 5;
+        }
+
         joint_state_publisher_.publish(msg);
     }
 }

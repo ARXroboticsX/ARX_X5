@@ -43,7 +43,8 @@ namespace arx::x5
                             std::vector<double> xyzrpy);
 
     private:
-
+        int arm_end_type_ = 0;
+        
         bool pub_topic_v1_ = false;
         bool pub_topic_v2_ = false;
         std::shared_ptr<InterfacesThread> interfaces_ptr_;

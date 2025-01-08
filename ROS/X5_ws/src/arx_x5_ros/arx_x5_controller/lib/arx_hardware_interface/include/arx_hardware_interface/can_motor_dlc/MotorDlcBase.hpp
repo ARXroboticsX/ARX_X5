@@ -21,6 +21,7 @@ namespace arx
             virtual CanFrame packDisableMotor() = 0;
 
             virtual HybridJointStatus GetMotorMsg() = 0;
+            virtual bool online() = 0;
             virtual void ExchangeMotorMsg() = 0;
             
         private:
