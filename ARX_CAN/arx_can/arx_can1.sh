@@ -51,7 +51,7 @@ while true; do
         echo "$CAN_INTERFACE 掉线，重启中..."
         
         sudo ip link set $CAN_INTERFACE down
-        sudo pkill -9 slcand  
+        sudo pkill -9 "slcand -o -f -s8 $CAN_DEVICE $CAN_INTERFACE"  
         sleep 1  
 
         if ! start_can; then
