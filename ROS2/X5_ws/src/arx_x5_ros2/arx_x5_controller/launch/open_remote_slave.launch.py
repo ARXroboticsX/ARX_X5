@@ -7,29 +7,30 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 params_file = os.path.join(
-    get_package_share_directory('arx_x5_controller'), 'config', 'aloha_arm.yaml')
+    get_package_share_directory('arx_x5_controller'), 'config', 'remote_slave.yaml')
 
-arm_master_l =Node(
+arm_slave_l =Node(
     package='arx_x5_controller',
     executable='X5Controller',
-    name='arm_master_l',
+    name='arm_slave_l',
     output='screen',                             
     parameters=[params_file],
 )
 
-arm_master_r =Node(
+arm_slave_r =Node(
     package='arx_x5_controller',
     executable='X5Controller',
-    name='arm_master_r',
+    name='arm_slave_r',
     output='screen',                             
     parameters=[params_file],
 )
+
 
 def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument(name='params_file',
                               default_value=params_file),
-        arm_master_l,
-        arm_master_r,
+        arm_slave_l,
+        arm_slave_r,
     ])

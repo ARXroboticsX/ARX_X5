@@ -28,7 +28,7 @@ namespace arx::x5 {
     private:
         std::shared_ptr<InterfacesThread> interfaces_ptr_;
 
-        // 通常 & aloha从机模式下
+        // 通常 & remote从机模式下
         rclcpp::Publisher<arx5_arm_msg::msg::RobotStatus>::SharedPtr joint_state_publisher_;
         // vr模式下
         rclcpp::Publisher<arm_control::msg::PosCmd>::SharedPtr vr_joint_state_publisher_;
@@ -37,7 +37,7 @@ namespace arx::x5 {
         rclcpp::Subscription<arx5_arm_msg::msg::RobotCmd>::SharedPtr joint_state_subscriber_;
         // vr模式下
         rclcpp::Subscription<arm_control::msg::PosCmd>::SharedPtr vr_joint_state_subscriber_;
-        // aloha从机模式下
+        // remote从机模式下
         rclcpp::Subscription<arx5_arm_msg::msg::RobotStatus>::SharedPtr follow_joint_state_subscriber_;
 
         rclcpp::TimerBase::SharedPtr timer_;
