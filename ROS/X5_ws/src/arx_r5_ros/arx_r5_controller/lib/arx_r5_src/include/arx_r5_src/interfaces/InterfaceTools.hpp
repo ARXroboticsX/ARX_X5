@@ -14,7 +14,8 @@ namespace arx::r5
     {
     public:
         InterfacesTools(int flag);
-        std::vector<double> ForwardKinematicsRpy(std::vector<double>);
+        ~InterfacesTools();
+        std::vector<double> ForwardKinematicsRpy(std::vector<double> joint_pos);
 
     private:
         class impl;

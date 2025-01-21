@@ -25,18 +25,18 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 # 添加可执行文件
 add_executable(X5Controller src/X5Controller.cpp)
 target_include_directories(X5Controller PUBLIC lib/arx_hardware_interface/include lib/arx_x5_src/include)
-target_link_libraries(X5Controller ${catkin_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_x5_src/libarx_x5_src.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_hardware_interface/libarx_hardware_interface.so)
+target_link_libraries(X5Controller ${catkin_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_x5_src/libarx_x5_src.so ${CMAKE_CURRENT_SOURCE_DIR}/)
 add_dependencies(X5Controller  ${catkin_EXPORTED_TARGETS})
 
 add_executable(KeyBoard src/KeyBoard.cpp)
 target_include_directories(KeyBoard PUBLIC lib/arx_hardware_interface/include lib/arx_x5_src/include)
-target_link_libraries(KeyBoard ${catkin_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_x5_src/libarx_x5_src.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_hardware_interface/libarx_hardware_interface.so)
+target_link_libraries(KeyBoard ${catkin_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_x5_src/libarx_x5_src.so ${CMAKE_CURRENT_SOURCE_DIR}/)
 add_dependencies(KeyBoard  ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS
         X5Controller
         DESTINATION lib/${PROJECT_NAME})
 
-install(FILES lib/arx_x5_src/libarx_x5_src.so lib/arx_hardware_interface/libarx_hardware_interface.so
+install(FILES lib/arx_x5_src/libarx_x5_src.so 
         DESTINATION lib/
 )
