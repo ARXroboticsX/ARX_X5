@@ -9,7 +9,7 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/arx_hardware_interface/include)
 
 pybind11_add_module(${PROJECT_NAME} src/single_arm_interface.cpp)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_x5_src/libarx_x5_src.so ${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_hardware_interface/libarx_hardware_interface.so pybind11::module)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_x5_src/libarx_x5_src.so  pybind11::module)
 
 # 设置安装路径
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/api/" CACHE PATH "Installation Directory" FORCE)
