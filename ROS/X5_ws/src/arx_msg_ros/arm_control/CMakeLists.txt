@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
         FILES
         PosCmd.msg
-        JointInfomation.msg
+        JointInformation.msg
         JointControl.msg
 )
 

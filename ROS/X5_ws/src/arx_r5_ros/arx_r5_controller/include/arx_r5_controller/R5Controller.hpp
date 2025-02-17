@@ -6,7 +6,7 @@
 #include "arx5_arm_msg/RobotStatus.h"
 
 #include "arm_control/PosCmd.h"
-#include "arm_control/JointInfomation.h"
+#include "arm_control/JointInformation.h"
 #include "arm_control/JointControl.h"
 
 #include <chrono>
@@ -23,7 +23,7 @@ namespace arx::r5
         void CmdCallbackV1(const arm_control::PosCmd::ConstPtr &msg);
         void CmdCallbackV2(const arx5_arm_msg::RobotCmd::ConstPtr &msg);
 
-        void FollowCallbackV1(const arm_control::JointInfomation::ConstPtr &msg);
+        void FollowCallbackV1(const arm_control::JointInformation::ConstPtr &msg);
         void FollowCallbackV2(const arx5_arm_msg::RobotStatus::ConstPtr &msg);
 
         void JointControlCallbackV1(const arm_control::JointControl::ConstPtr &msg);

@@ -30,7 +30,7 @@ namespace arx::x5
 
             // pub
             ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
-            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInformation>(pub_topic_joint_name_v1, 10);
             pub_topic_v1_ = true;
             pub_topic_v2_ = false;
         }
@@ -49,12 +49,12 @@ namespace arx::x5
         {
             ROS_INFO("vr_slave启动[v1]");
             // sub
-            joint_state_subscriber_ = nh.subscribe<arm_control::JointInfomation>(
+            joint_state_subscriber_ = nh.subscribe<arm_control::JointInformation>(
                 sub_topic_name, 10, &X5Controller::FollowCallbackV1, this);
 
             // pub
             ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
-            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInformation>(pub_topic_joint_name_v1, 10);
             pub_topic_v1_ = true;
             pub_topic_v2_ = false;
         }
@@ -64,7 +64,7 @@ namespace arx::x5
             interfaces_ptr_->setArmStatus(InterfacesThread::state::G_COMPENSATION);
             // pub
             ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
-            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInformation>(pub_topic_joint_name_v1, 10);
             pub_topic_v1_ = true;
             pub_topic_v2_ = false;
         }
@@ -72,12 +72,12 @@ namespace arx::x5
         {
             ROS_INFO("remote_slave启动[v1]");
             // sub
-            joint_state_subscriber_ = nh.subscribe<arm_control::JointInfomation>(
+            joint_state_subscriber_ = nh.subscribe<arm_control::JointInformation>(
                 sub_topic_name, 10, &X5Controller::FollowCallbackV1, this);
 
             // pub
             ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
-            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInformation>(pub_topic_joint_name_v1, 10);
             pub_topic_v1_ = true;
             pub_topic_v2_ = false;
         }
@@ -90,7 +90,7 @@ namespace arx::x5
 
             // pub
             ee_pos_publisher_v1_ = nh.advertise<arm_control::PosCmd>(pub_topic_ee_name_v1, 10);
-            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInfomation>(pub_topic_joint_name_v1, 10);
+            joint_state_publisher_v1_ = nh.advertise<arm_control::JointInformation>(pub_topic_joint_name_v1, 10);
             pub_topic_v1_ = true;
             pub_topic_v2_ = false;
         }
@@ -149,7 +149,7 @@ namespace arx::x5
         interfaces_ptr_->setCatch(msg->joint_pos[6]);
     }
 
-    void X5Controller::FollowCallbackV1(const arm_control::JointInfomation::ConstPtr &msg)
+    void X5Controller::FollowCallbackV1(const arm_control::JointInformation::ConstPtr &msg)
     {
         std::vector<double> target_joint_position(6, 0.0);
 
@@ -214,7 +214,7 @@ namespace arx::x5
                                       std::vector<double> joint_current_vector,
                                       std::vector<double> xyzrpy)
     {
-        arm_control::JointInfomation msg;
+        arm_control::JointInformation msg;
 
         for (int i = 0; i < 7; i++)
         {

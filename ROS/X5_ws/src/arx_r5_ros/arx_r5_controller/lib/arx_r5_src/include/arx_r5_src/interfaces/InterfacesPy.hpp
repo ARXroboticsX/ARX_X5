@@ -38,6 +38,10 @@ namespace arx::r5
         /// @return 三维矢量+四元数组成的7维vector
         std::vector<double> get_ee_pose();
 
+        /// @brief 获取末端位姿xyzrpy
+        /// @return xyzrpy组成的6维vector
+        std::vector<double> get_ee_pose_xyzrpy();
+
     private:
         class impl;
         std::unique_ptr<impl> pimpl;
