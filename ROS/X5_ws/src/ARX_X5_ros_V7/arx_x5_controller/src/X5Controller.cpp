@@ -37,7 +37,7 @@ X5Controller::X5Controller(ros::NodeHandle nh) {
   can_name_ = nh.param("arm_can_id", std::string("can0"));
   interfaces_ptr_ =
       std::make_shared<InterfacesThread>(urdf_path, can_name_, arm_end_type_);
-  interfaces_ptr_->arx_x(500, 2000, 10);
+  interfaces_ptr_->arx_x(150, 600, 10);
   interfaces_ptr_->setHomePositions(go_home_positions);
   if (arm_control_type == "normal_v1") {
     ROS_INFO("[%s] 常规模式启动[v1]", ros::this_node::getName().c_str());
