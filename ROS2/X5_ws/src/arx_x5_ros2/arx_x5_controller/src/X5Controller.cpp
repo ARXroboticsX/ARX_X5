@@ -26,7 +26,7 @@ X5Controller::X5Controller() : Node("x5_controller_node") {
   interfaces_ptr_ =
       std::make_shared<InterfacesThread>(urdf_path, this->declare_parameter("arm_can_id", "can0"), end_type);
   // RCLCPP_INFO(this->get_logger(), "arm_control_type = %s",arm_control_type.c_str());
-  interfaces_ptr_->arx_x(150, 600, 10);
+  interfaces_ptr_->arx_x(500, 2000, 10);
   interfaces_ptr_->setHomePositions(go_home_positions_);
   auto pub_name = this->declare_parameter("arm_pub_topic_name", "arm_status");
 

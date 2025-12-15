@@ -8,6 +8,7 @@ include_directories(${PROJECT_SOURCE_DIR}/lib/arx_x5_src/include)
 include_directories(${PROJECT_SOURCE_DIR}/lib/arx_hardware_interface/include)
 
 pybind11_add_module(${PROJECT_NAME} src/single_arm_interface.cpp)
+pybind11_add_module(kinematic_solver src/kinematic_solver.cpp)
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
     message(STATUS "Target architecture is ARM")
@@ -16,7 +17,10 @@ else ()
     set(DEPEND_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/arx_x5_src/libarx_x5_src.so")
 endif ()
 
+set(SOLVER_LIB "${CMAKE_CURRENT_SOURCE_DIR}/lib/libx5_kinematic_solver.so")
+target_include_directories(kinematic_solver PUBLIC lib/)
 target_link_libraries(${PROJECT_NAME} PUBLIC ${DEPEND_LIB} pybind11::module)
+target_link_libraries(kinematic_solver PUBLIC ${SOLVER_LIB} pybind11::module)
 
 # 设置安装路径
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/api/" CACHE PATH "Installation Directory" FORCE)
@@ -28,5 +32,8 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
     	    RENAME libarx_x5_src.so)
 endif()
 install(TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION ./${PROJECT_NAME}/
+        ARCHIVE DESTINATION ./${PROJECT_NAME}/)
+install(TARGETS kinematic_solver
         LIBRARY DESTINATION ./${PROJECT_NAME}/
         ARCHIVE DESTINATION ./${PROJECT_NAME}/)
