@@ -177,7 +177,7 @@ class SingleArm:
         )
         self.arm.set_arm_status(4)
 
-    def set_catch_pos(self, pos: float):
+    def set_gripper_pos(self, pos: float):
         self.arm.set_catch(pos)
 
     def get_joint_positions(
@@ -236,8 +236,11 @@ class SingleArm:
         xyzrpy = np.array([xyzwxyz[0], xyzwxyz[1], xyzwxyz[2], roll, pitch, yaw])
 
         return xyzrpy
+        
+    def get_catch_status(self):
+    	return self.arm.get_catch_status()
 
     def __del__(self):
         # 或者可以直接在析构函数中释放资源
         print("销毁 SingleArm 对象")
-        self.cleanup()
+        # self.cleanup()
