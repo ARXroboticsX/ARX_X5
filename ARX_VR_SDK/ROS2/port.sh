@@ -1,8 +1,8 @@
 #!/bin/bash
 
 echo "安装依赖"
-sudo apt install ros-humble-serial-driver
-sudo apt install ros-humble-asio-cmake-module
+sudo apt install ros-$ROS_DISTRO-serial-driver
+sudo apt install ros-$ROS_DISTRO-asio-cmake-module
 ls -l /dev/ttyACM*
 # 创建 udev 规则文件
 RULES_FILE="/etc/udev/rules.d/99-ttyACM.rules"

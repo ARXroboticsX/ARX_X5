@@ -22,6 +22,8 @@ namespace arx::x5
 
         bool set_catch(double pos);
 
+        void mit_joint_control(int id, double kp, double kd, double pos, double vel, double torque);
+
         /// @brief 获取关节位置
         /// @return 7维vector
         std::vector<double> get_joint_positions();
@@ -41,6 +43,9 @@ namespace arx::x5
         /// @brief 获取末端位姿xyzrpy
         /// @return xyzrpy组成的6维vector
         std::vector<double> get_ee_pose_xyzrpy();
+
+        /// @brief 获取夹爪是否夹到东西
+        bool get_catch_status();
         void arx_x(double arx1, double arx2, double arx3);
 
     private:

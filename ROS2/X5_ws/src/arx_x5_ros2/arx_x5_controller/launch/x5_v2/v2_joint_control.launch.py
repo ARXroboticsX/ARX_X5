@@ -17,14 +17,6 @@ arm_slave_l =Node(
     parameters=[params_file],
 )
 
-arm_slave_r =Node(
-    package='arx_x5_controller',
-    executable='X5Controller',
-    name='arm_slave_r',
-    output='screen',                             
-    parameters=[params_file],
-)
-
 
 def generate_launch_description():
 
@@ -32,5 +24,4 @@ def generate_launch_description():
         DeclareLaunchArgument(name='params_file',
                               default_value=params_file),
         arm_slave_l,
-        arm_slave_r,
     ])

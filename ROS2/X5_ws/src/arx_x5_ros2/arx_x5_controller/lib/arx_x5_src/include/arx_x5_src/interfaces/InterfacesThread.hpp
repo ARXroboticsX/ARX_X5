@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+#include <string>
 #include <mutex>
 #include <vector>
 #include <iostream>
@@ -41,7 +43,7 @@ namespace arx::x5
         void setCatchTorque(double torque);
         void arx_x(double arx1, double arx2, double arx3);
 
-        std::vector<int> getErrorCode();
+        std::map<int, std::string> getErrorMsg();
         /// @brief 状态枚举
         enum state
         {

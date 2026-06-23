@@ -11,6 +11,7 @@ X5Controller::X5Controller() : Node("x5_controller_node") {
   std::string arm_control_type = this->declare_parameter("arm_control_type", "normal");
   std::string package_name = "arx_x5_controller";
   std::string package_share_dir = ament_index_cpp::get_package_share_directory(package_name);
+  std::string urdf_name = this->declare_parameter("urdf_name", "");
   int end_type = this->declare_parameter("arm_end_type", 0);
   catch_control_mode_ = static_cast<CatchControlMode>(this->declare_parameter("catch_control_mode", 0));
   go_home_positions_ = this->declare_parameter<std::vector<double>>("go_home_position",std::vector<double>{0,0,0,0,0,0});
@@ -22,6 +23,9 @@ X5Controller::X5Controller() : Node("x5_controller_node") {
   else {
     urdf_path = package_share_dir + "/x5_2025.urdf";
     new_version_ = true;
+  }
+  if (!urdf_name.empty()) {
+    urdf_path = package_share_dir + "/" + urdf_name;
   }
   interfaces_ptr_ =
       std::make_shared<InterfacesThread>(urdf_path, this->declare_parameter("arm_can_id", "can0"), end_type);

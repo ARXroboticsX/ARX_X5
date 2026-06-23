@@ -56,6 +56,10 @@ install(FILES x5_2025.urdf
         DESTINATION share/${PROJECT_NAME}
 )
 
+install(FILES x5_head.urdf
+        DESTINATION share/${PROJECT_NAME}
+)
+
 ament_export_dependencies(rosidl_default_runtime)
 
 ament_package()
